@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:hello_world/mainScreens/home_screen.dart';
 import 'package:hello_world/widgets/custom_text_field.dart';
 import 'package:hello_world/widgets/error_dialog.dart';
 import 'package:hello_world/widgets/loading_dialog.dart';
@@ -92,6 +93,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             sellerImageUrl = url;
 
             //save info with firebase
+            authenticateAndSignUpSeller();
           });
         } else {
           showDialog(
@@ -115,6 +117,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
     }
   } 
+
+  void authenticateAndSignUpSeller() async {
+    User? currentUser;
+    final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+
+    await firebaseAuth.createUserWithEmailAndPassword(
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+    ).then((auth) {
+      currentUser: auth.user;
+    });
+
+    if(currentUser != null) {
+      saveDataToFiresotre(currentUser!).then((value) {
+        Navigator.pop(context);
+        //send user to home screen
+        Route newRoute = MaterialPageRoute(builder: (c) => HomeScreen());
+        Navigator.pushReplacement(context, newRoute);
+      });
+    }
+  }
 
   Future saveDataToFiresotre(User currentUser) async {
     FirebaseFirestore.instance.collection("sellers").doc(currentUser.uid).set({
