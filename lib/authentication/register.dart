@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hello_world/widgets/custom_text_field.dart';
+import 'package:hello_world/widgets/error_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -52,6 +53,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     locationController.text = completeAddress;
   }
+
+  Future<void> formValidation() async {
+    if (imageXFile == null) {
+      showDialog(
+        context: context,
+        builder: (c) {
+          return ErrorDialog(
+            message: "Please select an image.",
+          );
+        }
+      );
+    } else {
+      if(passwordController.text == confirmPasswordController.text) {
+        if(confirmPasswordController.text.isNotEmpty && emailController.text.isNotEmpty && nameController.text.isNotEmpty && phoneController.text.isNotEmpty && locationController.text.isNotEmpty) {
+          //start uploading the image
+        } else {
+          showDialog(
+            context: context,
+            builder: (c) {
+              return ErrorDialog(
+                message: "Please write all the required info",
+              );
+            }
+          );
+        }
+      } else {
+        showDialog(
+          context: context,
+          builder: (c) {
+            return ErrorDialog(
+              message: "Password must match.",
+            );
+          }
+        );
+      }
+    }
+  } 
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -136,7 +175,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         getCurrentLocation();
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: Colors.red,
+                        primary: Colors.grey,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         )
@@ -157,7 +196,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 primary: Colors.grey,
                 padding: EdgeInsets.symmetric(horizontal: 50, vertical: 10)
               ),
-              onPressed: ()=> print("clicked"),
+              onPressed: () {
+                formValidation();
+              },
             ),
             const SizedBox(height: 30,),
           ],
