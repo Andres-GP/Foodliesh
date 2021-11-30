@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "799699941373",
+    "project_id": "foodliesh-app",
+    "storage_bucket": "foodliesh-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:799699941373:android:31f7db57f0b61c2a84cb94",
+        "android_client_info": {
+          "package_name": "com.andres.foodliesh_sellers"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "799699941373-trmgl5u09d3k14n6svr75vr02d5fqtr3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVxlAxsej0wTU-VbaJ0admX7HDIaKZkrE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "799699941373-trmgl5u09d3k14n6svr75vr02d5fqtr3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
