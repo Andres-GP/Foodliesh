@@ -1,11 +1,15 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hello_world/widgets/custom_text_field.dart';
 import 'package:hello_world/widgets/error_dialog.dart';
+import 'package:hello_world/widgets/loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart' as fStorage;
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({ Key? key }) : super(key: key);
@@ -29,6 +33,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Position? position;
   List<Placemark>? placeMarks;
 
+  String sellerImageUrl = "";
+  String completeAddress = "";
+
 
   Future<void> _getImage() async {
     imageXFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -49,7 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     Placemark pMark = placeMarks![0];
 
-    String completeAddress = '${pMark.subThoroughfare} ${pMark.thoroughfare}, ${pMark.subLocality} ${pMark.locality}, ${pMark.subAdministrativeArea}, ${pMark.administrativeArea} ${pMark.postalCode}, ${pMark.country}';
+    completeAddress = '${pMark.subThoroughfare} ${pMark.thoroughfare}, ${pMark.subLocality} ${pMark.locality}, ${pMark.subAdministrativeArea}, ${pMark.administrativeArea} ${pMark.postalCode}, ${pMark.country}';
 
     locationController.text = completeAddress;
   }
@@ -67,7 +74,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } else {
       if(passwordController.text == confirmPasswordController.text) {
         if(confirmPasswordController.text.isNotEmpty && emailController.text.isNotEmpty && nameController.text.isNotEmpty && phoneController.text.isNotEmpty && locationController.text.isNotEmpty) {
-          //start uploading the image
+          showDialog(
+            context: context,
+            builder: (c)
+            {
+              return LoadingDialog(
+                message: "Registering Account",
+              );
+            }
+          );
+
+          String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+          fStorage.Reference reference = fStorage.FirebaseStorage.instance.ref().child("sellers").child(fileName);
+          fStorage.UploadTask uploadTask = reference.putFile(File(imageXFile!.path));
+          fStorage.TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => {});
+          await taskSnapshot.ref.getDownloadURL().then((url) {
+            sellerImageUrl = url;
+
+            //save info with firebase
+          });
         } else {
           showDialog(
             context: context,
@@ -90,6 +115,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
     }
   } 
+
+  Future saveDataToFiresotre(User currentUser) async {
+    FirebaseFirestore.instance.collection("sellers").doc(currentUser.uid).set({
+      "sellersUID": currentUser.uid,
+      "sellerEmail": currentUser.email,
+      "sellerName": nameController.text.trim(),
+      "sellerAvatarUrl": sellerImageUrl,
+      "phone": phoneController.text.trim(),
+      "address": completeAddress,
+      "status": "approved",
+      "earnings": 0.0,
+      "lat": position!.latitude,
+      "lng": position!.longitude,
+    });
+
+    //save local data
+  }
 
   @override
   Widget build(BuildContext context) {
