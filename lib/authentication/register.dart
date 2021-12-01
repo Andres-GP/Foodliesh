@@ -11,6 +11,7 @@ import 'package:hello_world/widgets/error_dialog.dart';
 import 'package:hello_world/widgets/loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as fStorage;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({ Key? key }) : super(key: key);
@@ -127,6 +128,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
       password: passwordController.text.trim(),
     ).then((auth) {
       currentUser: auth.user;
+    }).catchError((error) {
+      Navigator.pop(context);
+      showDialog(
+        context: context,
+        builder: (c) 
+        {
+          return ErrorDialog(
+            message: "Password do not match"
+          );
+        }
+      );
     });
 
     if(currentUser != null) {
@@ -154,6 +166,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     //save local data
+    SharedPreferences? sharedPreferences;
+    await sharedPreferences!.setString("uid", currentUser.uid);
+    await sharedPreferences!.setString("name", nameController.text.trim());
+    await sharedPreferences!.setString("photoUrl", sellerImageUrl);
   }
 
   @override
